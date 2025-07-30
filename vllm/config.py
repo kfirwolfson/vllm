@@ -2468,6 +2468,13 @@ class SchedulerConfig:
     structured outputs, speculative decoding, and pipeline parallelism.
     """
 
+    cache_hit_threshold: float = 0.0
+    """The threshold for cache hit ratio to handle the request. This enables
+    Decode-first optimization in Prefill-Decode disaggregation: Decode nodes
+    can avoide remote Prefill in case of high cache hit ratio.
+    If set to 0.0, the optimization is disabled.
+    """
+
     def compute_hash(self) -> str:
         """
         WARNING: Whenever a new field is added to this config,

@@ -204,6 +204,7 @@ class RequestStatus(enum.IntEnum):
     FINISHED_LENGTH_CAPPED = enum.auto()
     FINISHED_ABORTED = enum.auto()
     FINISHED_IGNORED = enum.auto()
+    FINISHED_CACHE_HIT_BELOW_THRESHOLD = enum.auto()
 
     def __str__(self):
         return self.name

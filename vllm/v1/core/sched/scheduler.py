@@ -328,6 +328,10 @@ class Scheduler(SchedulerInterface):
         # skipped and put back at the head of the waiting queue later
         skipped_waiting_requests = create_request_queue(self.policy)
 
+        # Temporary list to collect requests that are below the cache hit ratio
+        # threshold. These requests will be finished immediately.
+        cache_hit_below_threshold_requests = list()
+
         # Next, schedule the WAITING requests.
         if not preempted_reqs:
             while self.waiting and token_budget > 0:
@@ -389,6 +393,17 @@ class Scheduler(SchedulerInterface):
                     # Total computed tokens (local + external).
                     num_computed_tokens = (num_new_local_computed_tokens +
                                            num_external_computed_tokens)
+                    
+                    # Check if cache hit is above threshold
+                    cache_hit_percent = (num_computed_tokens 
+                                            / len(request.prompt_token_ids))
+                    if (cache_hit_percent <
+                            self.vllm_config.scheduler_config.cache_hit_threshold):
+                        self.waiting.pop_request()
+                        cache_hit_below_threshold_requests.append(request)
+                        continue
+
+
                 # KVTransfer: WAITING reqs have num_computed_tokens > 0
                 # after async KV recvs are completed.
                 else:
@@ -509,6 +524,10 @@ class Scheduler(SchedulerInterface):
         # Put back any skipped requests at the head of the waiting queue
         if skipped_waiting_requests:
             self.waiting.prepend_requests(skipped_waiting_requests)
+
+        if cache_hit_below_threshold_requests:
+            self.finish_requests(cache_hit_below_threshold_requests,
+                                 RequestStatus.FINISHED_CACHE_HIT_BELOW_THRESHOLD)
 
         # Check if the scheduling constraints are satisfied.
         total_num_scheduled_tokens = sum(num_scheduled_tokens.values())
