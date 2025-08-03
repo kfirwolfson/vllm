@@ -330,7 +330,7 @@ class Scheduler(SchedulerInterface):
 
         # Temporary list to collect requests that are below the cache hit ratio
         # threshold. These requests will be finished immediately.
-        cache_hit_below_threshold_requests = list()
+        cache_hit_below_threshold_request_ids = list()
 
         # Next, schedule the WAITING requests.
         if not preempted_reqs:
@@ -402,7 +402,7 @@ class Scheduler(SchedulerInterface):
                             self.vllm_config.scheduler_config.cache_hit_threshold):
                         logger.warning(f"KFIR Request dropped: KV hit rate {cache_hit_percent:.2f} < threshold {self.vllm_config.scheduler_config.cache_hit_threshold}")
                         self.waiting.pop_request()
-                        cache_hit_below_threshold_requests.append(request)
+                        cache_hit_below_threshold_request_ids.append(request.request_id)
                         continue
 
 
@@ -527,9 +527,9 @@ class Scheduler(SchedulerInterface):
         if skipped_waiting_requests:
             self.waiting.prepend_requests(skipped_waiting_requests)
 
-        logger.warning(f"cache_hit_below_threshold_requests {cache_hit_below_threshold_requests}")
-        if cache_hit_below_threshold_requests:
-            self.finish_requests(cache_hit_below_threshold_requests,
+        logger.warning(f"cache_hit_below_threshold_requests {cache_hit_below_threshold_request_ids}")
+        if cache_hit_below_threshold_request_ids:
+            self.finish_requests(cache_hit_below_threshold_request_ids,
                                  RequestStatus.FINISHED_CACHE_HIT_BELOW_THRESHOLD)
 
         # Check if the scheduling constraints are satisfied.
