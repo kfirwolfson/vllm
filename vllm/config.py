@@ -2631,7 +2631,12 @@ class SchedulerConfig:
                 f"max_long_partial_prefills ({self.max_long_partial_prefills}) "
                 "must be greater than or equal to 1 and less than or equal to "
                 f"max_num_partial_prefills ({self.max_num_partial_prefills}).")
-
+        
+        if self.cache_hit_threshold < 0.0 or self.cache_hit_threshold > 1.0:
+            raise ValueError(
+                f"cache_hit_threshold ({self.cache_hit_threshold}) "
+                "must be between 0.0 and 1.0, inclusive.")
+        
         return self
 
     @property
@@ -4942,7 +4947,7 @@ class VllmConfig:
         return (
             f"model={self.model_config.model!r}, "
             f"speculative_config={self.speculative_config!r}, "
-            f"tokenizer={self.model_config.tokenizer!r}, "
+            f"to;kenizer={self.model_config.tokenizer!r}, "
             f"skip_tokenizer_init={self.model_config.skip_tokenizer_init}, "
             f"tokenizer_mode={self.model_config.tokenizer_mode}, "
             f"revision={self.model_config.revision}, "
@@ -4970,7 +4975,8 @@ class VllmConfig:
             f"chunked_prefill_enabled={self.scheduler_config.chunked_prefill_enabled}, "  # noqa
             f"use_async_output_proc={self.model_config.use_async_output_proc}, "
             f"pooler_config={self.model_config.pooler_config!r}, "
-            f"compilation_config={self.compilation_config!r}")
+            f"compilation_config={self.compilation_config!r}, "
+            f"cache_hit_threshold={self.scheduler_config.cache_hit_threshold}")
 
 
 _current_vllm_config: Optional[VllmConfig] = None

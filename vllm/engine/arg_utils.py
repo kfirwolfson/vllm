@@ -442,6 +442,9 @@ class EngineArgs:
         ParallelConfig.enable_multimodal_encoder_data_parallel
 
     async_scheduling: bool = SchedulerConfig.async_scheduling
+    
+    cache_hit_threshold: float = SchedulerConfig.cache_hit_threshold
+
     # DEPRECATED
     enable_prompt_adapter: bool = False
 
@@ -830,6 +833,8 @@ class EngineArgs:
             **scheduler_kwargs["disable_hybrid_kv_cache_manager"])
         scheduler_group.add_argument("--async-scheduling",
                                      **scheduler_kwargs["async_scheduling"])
+        scheduler_group.add_argument("--cache-hit-threshold",
+                                     **scheduler_kwargs["cache_hit_threshold"])
 
         # vLLM arguments
         vllm_kwargs = get_kwargs(VllmConfig)
@@ -1245,6 +1250,7 @@ class EngineArgs:
             disable_hybrid_kv_cache_manager=self.
             disable_hybrid_kv_cache_manager,
             async_scheduling=self.async_scheduling,
+            cache_hit_threshold=self.cache_hit_threshold
         )
 
         if not model_config.is_multimodal_model and self.default_mm_loras:

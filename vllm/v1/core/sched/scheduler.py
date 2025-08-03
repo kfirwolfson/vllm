@@ -397,8 +397,10 @@ class Scheduler(SchedulerInterface):
                     # Check if cache hit is above threshold
                     cache_hit_percent = (num_computed_tokens 
                                             / len(request.prompt_token_ids))
+                    logger.warning(f"KFIR Request KV hit rate:{cache_hit_percent:.2f}")
                     if (cache_hit_percent <
                             self.vllm_config.scheduler_config.cache_hit_threshold):
+                        logger.warning(f"KFIR Request dropped: KV hit rate {cache_hit_percent:.2f} < threshold {self.vllm_config.scheduler_config.cache_hit_threshold}")
                         self.waiting.pop_request()
                         cache_hit_below_threshold_requests.append(request)
                         continue
