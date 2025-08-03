@@ -527,6 +527,7 @@ class Scheduler(SchedulerInterface):
         if skipped_waiting_requests:
             self.waiting.prepend_requests(skipped_waiting_requests)
 
+        logger.warning(f"cache_hit_below_threshold_requests {cache_hit_below_threshold_requests}")
         if cache_hit_below_threshold_requests:
             self.finish_requests(cache_hit_below_threshold_requests,
                                  RequestStatus.FINISHED_CACHE_HIT_BELOW_THRESHOLD)
